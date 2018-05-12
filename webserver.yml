@@ -5,12 +5,19 @@
     packages:
       - git
       - apache2
+      - git-lfs
   vars_files:
     - conf/websites.yml
+    - conf/git_username_password.yml
+
+  roles:
+    - { role: capotej.packagecloud, repository: github/git-lfs, os: ubuntu, version: xenial }
   tasks:
     - name: install packages 
-      apt: name={{ packages }} update_cache=yes state=latest
-
+      apt: 
+        name: "{{ packages }}"
+        update_cache: yes
+        state: latest
     - name: enabled mod_rewrite
       apache2_module: name=rewrite state=present
       notify:
@@ -26,19 +33,25 @@
       notify:
         - restart apache2
   
-    - include: create_virtual_host.yml website="{{ item }}"
+    - include_tasks: create_virtual_host.yml
+      vars: 
+        domain: "{{ item.domain }}"
       loop: "{{ websites }}" 
 
-    # - name: a2ensite everything 
-    #   command: a2ensite {{ item }}
-    #   args:
-    #     creates: /etc/apache2/sites-enabled/{{ item.domain }}.conf
-    #   notify:
-    #     - restart apache2
-    #   loop: "{{ websites }}"
-    
-    # - name: clone basic html template
-    #   git: repo=https://github.com/do-community/ansible-apache-tutorial.git dest=/var/www/example.com update=no
+    - name: a2ensite everything 
+      command: a2ensite {{ item.domain }}
+      args:
+        creates: /etc/apache2/sites-enabled/{{ item.domain }}.conf
+      notify:
+        - restart apache2
+      loop: "{{ websites }}"
+  
+    - name: Get updated files from git repository 
+      git: 
+        repo: "https://{{ github_username | urlencode }}:{{ github_password | urlencode }}@github.com/{{ github_username | urlencode }}/{{ item.repo }}"
+        dest: /var/www/{{ item.domain }}
+        update: no
+      loop: "{{ websites }}"
 
   handlers:
     - name: restart apache2

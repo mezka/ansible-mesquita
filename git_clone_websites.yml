@@ -1,0 +1,7 @@
+# git clone websites
+
+- name: clone basic html template
+  git:
+    repo: https://github.com/do-community/ansible-apache-tutorial.git
+    dest: /var/www/example.com
+    update: no

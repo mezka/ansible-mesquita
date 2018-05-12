@@ -1,4 +1,6 @@
 #task to create virtual host file
 
-name: create virtual host file
-      template: src=conf/virtualhost.conf dest=/etc/apache2/sites-available/{{ webiste.domain }}.conf
+- name: create virtual host file
+  template:
+    src: conf/virtualhost.conf
+    dest: /etc/apache2/sites-available/{{ domain }}.conf

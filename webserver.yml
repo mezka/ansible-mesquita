@@ -6,6 +6,7 @@
       - git
       - apache2
       - git-lfs
+
   vars_files:
     - conf/websites.yml
     - conf/git_username_password.yml

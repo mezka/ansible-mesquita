@@ -29,7 +29,6 @@
         owner: www-data
         group: www-data
         mode: 0775
-        recurse: yes
       become: yes
     
     - name: Add {{ user }} to www-data group in order to give it write access to '/var/www' without having to run the next command as become (sudo)
@@ -46,6 +45,16 @@
         accept_hostkey: yes
         update: no
       become: no
+      loop: "{{ websites }}"
+    
+    - name: Set user, group and permissions of cloned git repositories
+      file:
+        path: /var/www/{{ item.domain }}
+        owner: www-data
+        group: www-data
+        mode: 0775
+        recurse: yes
+      become: yes
       loop: "{{ websites }}"
 
     - name: Enable mod_rewrite Apache2 module

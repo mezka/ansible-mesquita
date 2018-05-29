@@ -32,7 +32,7 @@
       blockinfile:
         path: /home/{{ ansible_user_id }}/.ansible.cfg
         backup: yes
-        block: "[ssh_connection]\nssh_args = -C -o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s"
+        block: "[ssh_connection]\nssh_args = -C -o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no"
         state: present
 
         

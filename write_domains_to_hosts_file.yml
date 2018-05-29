@@ -1,0 +1,12 @@
+- hosts: 127.0.0.1
+  connection: local
+  vars_files:
+  - conf/websites.yml
+  tasks:
+    - name: Write domain addresses into hosts file as located in '127.0.0.1' for testing
+      lineinfile:
+        path: /etc/hosts
+        line: "127.0.0.1\t{{item.domain}}"
+        state: present
+      become: yes
+      loop: "{{ websites }}"

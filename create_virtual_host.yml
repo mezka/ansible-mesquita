@@ -4,3 +4,4 @@
   template:
     src: conf/virtualhost.conf
     dest: /etc/apache2/sites-available/{{ domain }}.conf
+  become: yes

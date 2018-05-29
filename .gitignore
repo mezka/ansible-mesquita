@@ -1,2 +1,6 @@
-webserver.retry
 conf/git_username_password.yml
+deploy_websites.retry
+create_virtual_host.retry
+delete_domains_from_hosts_file.retry
+set_up_ssh_agent_forwarding.retry
+write_domain_to_hosts_file.retry

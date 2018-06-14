@@ -1,0 +1,98 @@
+- hosts: webservers
+  vars:
+    http_port: 80
+    user: "{{ ansible_user_id }}"
+    packages:
+      - git
+      - apache2
+      - git-lfs
+      - php
+      - php-xml
+
+  vars_files:
+    - conf/websites.yml
+
+  roles:
+    - { role: capotej.packagecloud, repository: github/git-lfs, os: ubuntu, version: xenial, become: yes}
+  tasks:
+    - name: install packages 
+      apt: 
+        name: "{{ packages }}"
+        update_cache: yes
+        state: latest
+      become: yes
+
+    - name: Install git-lfs
+      shell: git lfs install
+
+    - name: enabled mod_rewrite
+      apache2_module: name=rewrite state=present
+      become: yes
+      notify:
+        - restart apache2
+
+    - name: Change owner:group of '/var/www' to www-data:www-data and set permissions to 0755
+      file:
+        path: /var/www
+        owner: www-data
+        group: www-data
+        mode: 0775
+      become: yes
+
+    - name: Add {{ user }} to www-data group in order to give it write access to '/var/www' without having to run the next command as become (sudo)
+      user:
+        name: "{{ user }}"
+        groups: www-data
+        append: yes
+      become: yes
+
+    - name: Get files from git repository 
+      git:
+        repo: git@github.com:mezka/{{ item.repo }}
+        dest: /var/www/{{ item.domain }}
+        accept_hostkey: yes
+        update: no
+        ssh_opts: "-o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+      loop: "{{ websites }}"
+    
+    - name: Set user, group and permissions of cloned git repositories
+      file:
+        path: /var/www/{{ item.domain }}
+        owner: www-data
+        group: www-data
+        mode: 0775
+        recurse: yes
+      become: yes
+      loop: "{{ websites }}"
+
+    - name: apache2 listen on port {{ http_port }}
+      lineinfile: dest=/etc/apache2/ports.conf regexp="^Listen " line="Listen {{ http_port }}" state=present
+      notify:
+        - restart apache2
+
+    - name: apache2 virtualhost on port {{ http_port }}
+      lineinfile: dest=/etc/apache2/sites-available/000-default.conf regexp="^<VirtualHost \*:" line="<VirtualHost *:{{ http_port }}>"
+      notify:
+        - restart apache2
+  
+    - include_tasks: create_virtual_host.yml
+      vars: 
+        domain: "{{ item.domain }}"
+      loop: "{{ websites }}" 
+      
+
+    - name: a2ensite everything 
+      command: a2ensite {{ item.domain }}
+      args:
+        creates: /etc/apache2/sites-enabled/{{ item.domain }}.conf
+      notify:
+        - restart apache2
+      become: yes
+      loop: "{{ websites }}"
+      
+
+  handlers:
+    - name: restart apache2
+      service:
+        name: apache2
+        state: restarted

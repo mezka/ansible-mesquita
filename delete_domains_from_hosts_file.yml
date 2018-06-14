@@ -1,0 +1,13 @@
+- hosts: 127.0.0.1
+  connection: local
+  vars_files:
+  - conf/websites.yml
+  tasks:
+    - name: Delete domain addresses from hosts file
+      lineinfile:
+        path: /etc/hosts
+        regexp: "^{{item.domain}}"
+        line: "127.0.0.1\t{{item.domain}}"
+        state: absent
+      become: yes
+      loop: "{{ websites }}"

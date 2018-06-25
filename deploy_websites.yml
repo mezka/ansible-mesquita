@@ -1,7 +1,7 @@
 - hosts: webservers
   vars:
-    http_port: 80
     user: "{{ ansible_user_id }}"
+    http_port: 80
     packages:
       - git
       - apache2
@@ -25,8 +25,10 @@
     - name: Install git-lfs
       shell: git lfs install
 
-    - name: enabled mod_rewrite
-      apache2_module: name=rewrite state=present
+    - name: Enabled Apache2 'mod_rewrite' module
+      apache2_module:
+        name: rewrite
+        state: present
       become: yes
       notify:
         - restart apache2
@@ -52,9 +54,9 @@
         dest: /var/www/{{ item.domain }}
         accept_hostkey: yes
         update: no
-        ssh_opts: "-o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        ssh_opts: "-o ForwardAgent=yes -o StrictHostKeyChecking=no"
       loop: "{{ websites }}"
-    
+
     - name: Set user, group and permissions of cloned git repositories
       file:
         path: /var/www/{{ item.domain }}
@@ -66,20 +68,18 @@
       loop: "{{ websites }}"
 
     - name: apache2 listen on port {{ http_port }}
-      lineinfile: dest=/etc/apache2/ports.conf regexp="^Listen " line="Listen {{ http_port }}" state=present
+      lineinfile:
+        dest: /etc/apache2/ports.conf
+        regexp: "^Listen "
+        line: "Listen {{ http_port }}"
+        state: present
       notify:
         - restart apache2
 
-    - name: apache2 virtualhost on port {{ http_port }}
-      lineinfile: dest=/etc/apache2/sites-available/000-default.conf regexp="^<VirtualHost \*:" line="<VirtualHost *:{{ http_port }}>"
-      notify:
-        - restart apache2
-  
     - include_tasks: create_virtual_host.yml
       vars: 
         domain: "{{ item.domain }}"
       loop: "{{ websites }}" 
-      
 
     - name: a2ensite everything 
       command: a2ensite {{ item.domain }}
@@ -89,10 +89,10 @@
         - restart apache2
       become: yes
       loop: "{{ websites }}"
-      
-
+  
   handlers:
     - name: restart apache2
       service:
         name: apache2
         state: restarted
+      become: yes

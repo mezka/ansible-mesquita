@@ -1,4 +1,4 @@
-- hosts: webservers
+- hosts: Current_Host
   vars:
     user: "{{ ansible_user_id }}"
     http_port: 80

@@ -13,7 +13,7 @@
     - conf/websites.yml
 
   roles:
-    - { role: capotej.packagecloud, repository: github/git-lfs, os: ubuntu, version: xenial, become: yes}
+    - { role: computology.packagecloud, repository: github/git-lfs, os: ubuntu, version: bionic, become: yes}
   tasks:
     - name: install packages 
       apt: 

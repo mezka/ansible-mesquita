@@ -4,5 +4,5 @@ websites:
     repo: wiki.encuestamesquita.ml.git
   - domain: agenciasegura.com
     repo: agenciasegura.com.git
-  - domain: espacioseguro.com
-    repo: espacioseguro.com.git
+  - domain: espacioseguro.com.ar
+    repo: espacioseguro.com.ar.git

@@ -1,7 +1,7 @@
 #A list of dictionaries with the domain and git repository of the websites intended for deployment
 websites:
-  - domain: wiki.encuestamesquita.ml
-    repo: wiki.encuestamesquita.ml.git
+  - domain: wiki.mesquita.ml
+    repo: wiki.mesquita.ml.git
   - domain: agenciasegura.com
     repo: agenciasegura.com.git
   - domain: espacioseguro.com.ar
